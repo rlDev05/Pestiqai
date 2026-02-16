@@ -1,131 +1,161 @@
 import { motion } from 'motion/react';
-import { MapPin, Mail, Phone } from 'lucide-react';
+import { MapPin, Mail, Phone, ArrowRight, ShieldCheck, Zap, Lock } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 
+// Import your logo here. 
+// Note: Adjust the "../" based on exactly where your Footer.tsx is relative to the styles folder!
+import logoImg from "../../styles/images/pestiqlogo.png";
+
 export function Footer() {
   return (
-    <footer className="bg-[#0F2F2A] text-white">
+    <footer className="relative overflow-hidden bg-[#111111] text-white border-t border-[#7ED957]/20">
+      {/* Background Gradient Mesh - Futuristic touch */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0F3D2E] to-[#111111] opacity-90" />
+      
+      {/* Subtle Grid Pattern Overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+
       {/* Main footer content */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-[#2DD4BF] rounded-lg flex items-center justify-center">
-                <span className="text-[#0F2F2A] font-bold text-xl">P</span>
-              </div>
-              <span className="text-xl font-semibold">PESTIQ AI</span>
+      <div className="relative max-w-7xl mx-auto px-6 py-20">
+        <div className="grid md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
+          
+          {/* Brand Section (Span 4 columns) */}
+          <div className="lg:col-span-4 space-y-6">
+            
+            {/* UPDATED: Image Logo replacing the CSS icon and text */}
+            <div className="relative w-36 h-auto flex items-center justify-start">
+              <img 
+                src={logoImg} 
+                alt="Pestiq AI Logo" 
+                className="w-full h-full object-contain object-left"
+              />
             </div>
-            <p className="text-white/70 text-sm leading-relaxed mb-4">
-              AI-powered pest detection for premium properties in NCR, Philippines.
+
+            <p className="text-white/60 text-sm leading-relaxed max-w-xs">
+              Next-generation pest detection for premium properties. Powered by neural networks, secured by design.
             </p>
-            <div className="flex items-center gap-2 text-sm text-white/70">
-              <MapPin className="w-4 h-4 text-[#2DD4BF]" />
-              <span>NCR, Philippines Only</span>
+            
+            {/* Location Tag */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#7ED957]/10 border border-[#7ED957]/20">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#7ED957] animate-pulse" />
+              <span className="text-xs font-medium text-[#7ED957] tracking-wide uppercase">NCR, Philippines Operational</span>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
-              {['Product', 'Features', 'How It Works', 'Pricing', 'Privacy'].map((link) => (
+          {/* Quick Links (Span 2 columns) */}
+          <div className="lg:col-span-2">
+            <h4 className="text-[#7ED957] text-sm font-semibold uppercase tracking-wider mb-6">System</h4>
+            <ul className="space-y-3">
+              {['Product', 'Technology', 'How It Works', 'Enterprise', 'Privacy'].map((link) => (
                 <li key={link}>
-                  <button className="text-sm text-white/70 hover:text-[#2DD4BF] transition-colors duration-200">
-                    {link}
+                  <button className="text-sm text-white/60 hover:text-[#7ED957] hover:translate-x-1 transition-all duration-300 flex items-center gap-2">
+                   <span className="w-1 h-1 rounded-full bg-[#7ED957] opacity-0 hover:opacity-100 transition-opacity" />
+                   {link}
                   </button>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Contact */}
-          <div>
-            <h4 className="font-semibold mb-4">Contact Us</h4>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-2 text-sm text-white/70">
-                <Mail className="w-4 h-4 text-[#2DD4BF]" />
-                <a href="mailto:hello@pestiq.ai" className="hover:text-[#2DD4BF] transition-colors duration-200">
+          {/* Contact (Span 2 columns) */}
+          <div className="lg:col-span-3">
+            <h4 className="text-[#7ED957] text-sm font-semibold uppercase tracking-wider mb-6">Connect</h4>
+            <ul className="space-y-4">
+              <li className="group">
+                <a href="mailto:hello@pestiq.ai" className="flex items-center gap-3 text-sm text-white/60 group-hover:text-white transition-colors duration-200">
+                  <div className="p-2 rounded-lg bg-white/5 group-hover:bg-[#7ED957]/20 transition-colors">
+                    <Mail className="w-4 h-4 text-[#7ED957]" />
+                  </div>
                   hello@pestiq.ai
                 </a>
               </li>
-              <li className="flex items-center gap-2 text-sm text-white/70">
-                <Phone className="w-4 h-4 text-[#2DD4BF]" />
-                <a href="tel:+639123456789" className="hover:text-[#2DD4BF] transition-colors duration-200">
+              <li className="group">
+                <a href="tel:+639123456789" className="flex items-center gap-3 text-sm text-white/60 group-hover:text-white transition-colors duration-200">
+                  <div className="p-2 rounded-lg bg-white/5 group-hover:bg-[#7ED957]/20 transition-colors">
+                    <Phone className="w-4 h-4 text-[#7ED957]" />
+                  </div>
                   +63 912 345 6789
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Newsletter */}
-          <div>
-            <h4 className="font-semibold mb-4">Stay Updated</h4>
-            <p className="text-sm text-white/70 mb-4">
-              Get the latest updates on pest protection technology.
-            </p>
-            <div className="flex gap-2">
-              <Input
-                type="email"
-                placeholder="Your email"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-              />
-              <Button className="bg-[#2DD4BF] text-[#0F2F2A] hover:bg-[#14B8A6]">
-                Subscribe
-              </Button>
+          {/* Newsletter (Span 3 columns) */}
+          <div className="lg:col-span-3">
+            <h4 className="text-[#7ED957] text-sm font-semibold uppercase tracking-wider mb-6">Updates</h4>
+            <div className="p-1 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 backdrop-blur-sm">
+                <div className="bg-[#111111]/80 rounded-xl p-4">
+                    <p className="text-xs text-white/50 mb-3">
+                    Join the waitlist for perimeter upgrades.
+                    </p>
+                    <div className="flex flex-col gap-2">
+                    <Input
+                        type="email"
+                        placeholder="Enter access email"
+                        className="bg-[#0F3D2E]/50 border-[#7ED957]/20 text-white placeholder:text-white/30 focus:border-[#7ED957] focus:ring-[#7ED957]/20 transition-all h-10 text-sm"
+                    />
+                    <Button className="w-full bg-[#7ED957] text-[#0F3D2E] hover:bg-[#6BC94A] hover:shadow-[0_0_15px_rgba(126,217,87,0.4)] font-semibold transition-all duration-300">
+                        Subscribe <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                    </div>
+                </div>
             </div>
           </div>
         </div>
 
-        {/* Service area disclaimer */}
+        {/* Service area disclaimer - Futuristic Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="bg-[#F59E0B]/10 border border-[#F59E0B]/30 rounded-xl p-6 mb-8"
+          className="relative overflow-hidden bg-[#0F3D2E]/40 border border-[#7ED957]/30 rounded-lg p-5 mb-10 group"
         >
-          <div className="flex items-start gap-3">
-            <MapPin className="w-5 h-5 text-[#F59E0B] flex-shrink-0 mt-0.5" />
-            <div>
-              <h5 className="font-semibold text-[#F59E0B] mb-1">Service Area Notice</h5>
-              <p className="text-sm text-white/70">
-                PESTIQ AI currently services NCR (National Capital Region), Philippines only. 
-                Expanding to other regions soon.
+          {/* Scanning light effect */}
+          <div className="absolute top-0 -left-[100%] group-hover:left-[100%] w-full h-full bg-gradient-to-r from-transparent via-[#7ED957]/10 to-transparent transition-all duration-1000 ease-in-out" />
+          
+          <div className="flex items-start md:items-center flex-col md:flex-row gap-4 relative z-10">
+            <div className="p-2 bg-[#7ED957]/10 rounded-md">
+                <MapPin className="w-5 h-5 text-[#7ED957]" />
+            </div>
+            <div className="flex-1">
+              <h5 className="font-semibold text-white mb-1 flex items-center gap-2">
+                Active Service Zone 
+                <span className="w-1.5 h-1.5 rounded-full bg-[#7ED957] animate-pulse" />
+              </h5>
+              <p className="text-sm text-white/60">
+                Deployment currently restricted to <span className="text-[#7ED957] font-medium">National Capital Region (NCR)</span>. Regional expansion protocols initiating soon.
               </p>
             </div>
           </div>
         </motion.div>
 
-        {/* Trust badges */}
-        <div className="flex flex-wrap items-center justify-center gap-6 py-8 border-y border-white/10">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-[#2DD4BF] rounded-full" />
-            <span className="text-sm text-white/70">AI-Powered</span>
-          </div>
-          <div className="w-px h-6 bg-white/20" />
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-[#2DD4BF] rounded-full" />
-            <span className="text-sm text-white/70">Privacy-First</span>
-          </div>
-          <div className="w-px h-6 bg-white/20" />
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-[#2DD4BF] rounded-full" />
-            <span className="text-sm text-white/70">Secure by Design</span>
-          </div>
-          <div className="w-px h-6 bg-white/20" />
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-[#2DD4BF] rounded-full" />
-            <span className="text-sm text-white/70">Free Upgrades</span>
-          </div>
+        {/* Trust badges / Status Bar */}
+        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 py-8 border-t border-white/5">
+          {[
+            { icon: Zap, label: "AI-Powered Analysis" },
+            { icon: Lock, label: "Privacy-First Core" },
+            { icon: ShieldCheck, label: "Military-Grade Security" },
+          ].map((badge, idx) => (
+            <div key={idx} className="flex items-center gap-2 group cursor-default">
+              <badge.icon className="w-4 h-4 text-[#7ED957] opacity-60 group-hover:opacity-100 group-hover:drop-shadow-[0_0_8px_rgba(126,217,87,0.6)] transition-all" />
+              <span className="text-sm text-white/40 group-hover:text-white/80 transition-colors">
+                {badge.label}
+              </span>
+            </div>
+          ))}
         </div>
 
         {/* Copyright */}
-        <div className="text-center pt-8">
-          <p className="text-sm text-white/50">
-            © 2026 PESTIQ AI. All rights reserved. | Built with privacy & security in mind.
+        <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/5 gap-4">
+          <p className="text-xs text-white/30">
+            © 2026 PESTIQ AI. <span className="text-[#0F3D2E]">_</span> System Version 2.0
           </p>
+          <div className="flex gap-6">
+             <a href="#" className="text-xs text-white/30 hover:text-[#7ED957] transition-colors">Terms of Service</a>
+             <a href="#" className="text-xs text-white/30 hover:text-[#7ED957] transition-colors">Privacy Policy</a>
+          </div>
         </div>
       </div>
     </footer>

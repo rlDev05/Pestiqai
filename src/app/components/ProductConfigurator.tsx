@@ -1,15 +1,45 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Button } from './ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from './ui/button'; // Assuming these can accept className overrides, otherwise standard button styles are applied inline
 import { Badge } from './ui/badge';
-import { Camera, Check, Sparkles, Calendar } from 'lucide-react';
+import { Camera, Check, Sparkles, Zap, ArrowRight, Building2, User, Mail, Phone, MapPin, MessageSquare, Terminal, Shield } from 'lucide-react';
+
+// --- BACKGROUND HELPER (Consistent with Hero) ---
+const GridBlink = ({ delay, x, y }: { delay: number; x: number; y: number }) => (
+  <motion.div
+    className="absolute w-12 h-12 bg-[#7ED957]/20 border border-[#7ED957]/40"
+    style={{ left: `${x}%`, top: `${y}%` }}
+    initial={{ opacity: 0, scale: 0.5 }}
+    animate={{ 
+      opacity: [0, 1, 0],
+      scale: [0.8, 1, 0.8],
+    }}
+    transition={{ 
+      duration: 2, 
+      repeat: Infinity, 
+      delay: delay,
+      repeatDelay: Math.random() * 5 + 2 
+    }}
+  />
+);
 
 type BillingPeriod = 'monthly' | 'annual';
+type ActionType = 'quote' | 'inquiry' | null;
 
 export function ProductConfigurator() {
   const [selectedDevice] = useState('pestiq-ai-cam');
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('monthly');
-  const [selectedAction, setSelectedAction] = useState<'quote' | 'inquiry' | null>(null);
+  const [selectedAction, setSelectedAction] = useState<ActionType>(null);
+
+  // Form states
+  const [quoteForm, setQuoteForm] = useState({ company: '', contact: '', email: '', phone: '', address: '' });
+  const [inquiryForm, setInquiryForm] = useState({ name: '', email: '', topic: 'specs', message: '' });
+
+  // Background blinkers configuration
+  const blinkers = [
+    { x: 10, y: 20, d: 0 }, { x: 90, y: 10, d: 2 }, { x: 50, y: 90, d: 1 },
+    { x: 20, y: 60, d: 3 }, { x: 80, y: 50, d: 0.5 }
+  ];
 
   const plans = {
     monthly: {
@@ -20,15 +50,54 @@ export function ProductConfigurator() {
     annual: {
       price: '₱49,999',
       period: 'per year',
-      savings: 'Save ₱10,000'
+      savings: 'SAVING: ₱10,000'
     }
   };
 
   const currentPlan = plans[billingPeriod];
 
+  const handleQuoteSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Quote Request Submitted:', { device: selectedDevice, plan: billingPeriod, ...quoteForm });
+  };
+
+  const handleInquirySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Inquiry Submitted:', { device: selectedDevice, ...inquiryForm });
+  };
+
   return (
-    <section id="pricing" className="py-24 bg-gradient-to-br from-white via-[#F8FAF9] to-white">
-      <div className="max-w-6xl mx-auto px-6">
+    <section id="pricing" className="relative py-24 bg-[#001a14] overflow-hidden">
+      
+      {/* ======================= BACKGROUND THEME (MATCHING HERO) ======================= */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {/* 1. Base Grid */}
+        <div 
+          className="absolute inset-0 opacity-[0.1]"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, #15803d 1px, transparent 1px),
+              linear-gradient(to bottom, #15803d 1px, transparent 1px)
+            `,
+            backgroundSize: "4rem 4rem",
+            maskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent)"
+          }}
+        />
+        {/* 2. Glows */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-[#7ED957]/5 blur-[120px] pointer-events-none" />
+        
+        {/* 3. Blinking Cells */}
+        <div className="absolute inset-0 z-0 opacity-20">
+           {blinkers.map((b, i) => (
+             <GridBlink key={i} x={b.x} y={b.y} delay={b.d} />
+           ))}
+        </div>
+
+        {/* 4. Grain Overlay */}
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay" />
+      </div>
+
+      <div className="max-w-6xl mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -36,145 +105,162 @@ export function ProductConfigurator() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl lg:text-5xl font-bold text-[#0F2F2A] mb-4">
-            Build Your System
+          <div className="inline-flex items-center gap-2 bg-[#022c22] border border-[#7ED957]/30 px-4 py-1.5 rounded-full mb-6 shadow-[0_0_15px_-3px_rgba(126,217,87,0.3)]">
+            <Terminal className="w-3 h-3 text-[#7ED957]" />
+            <span className="text-xs font-mono font-bold text-[#7ED957] tracking-widest uppercase">Configuration Terminal</span>
+          </div>
+          
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
+            Construct Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7ED957] to-[#2ea043]">Ecosystem</span>
           </h2>
-          <p className="text-lg text-[#6B7280] max-w-2xl mx-auto">
-            Configure your PESTIQ AI solution in three simple steps.
+          <p className="text-lg text-gray-400 max-w-2xl mx-auto font-light">
+            Initialize your PESTIQ AI solution. Select hardware parameters, configure protocol frequency, and activate defense.
           </p>
         </motion.div>
 
-        <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden">
-          {/* Step 1: Choose Device */}
+        {/* MAIN HUD CONTAINER */}
+        <div className="bg-[#001a14]/60 backdrop-blur-md rounded-3xl border border-[#7ED957]/20 relative overflow-hidden">
+          {/* Decorative Corner Borders */}
+          <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-[#7ED957]/50 rounded-tl-xl" />
+          <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-[#7ED957]/50 rounded-tr-xl" />
+          <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-[#7ED957]/50 rounded-bl-xl" />
+          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-[#7ED957]/50 rounded-br-xl" />
+
+          {/* Step 1: Select Hardware */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="p-8 border-b border-gray-100"
+            className="p-8 border-b border-[#7ED957]/10"
           >
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-[#2DD4BF] text-white rounded-full flex items-center justify-center font-bold text-sm">
-                1
+             <div className="flex items-center gap-3 mb-6">
+              <div className="w-8 h-8 bg-[#7ED957]/10 border border-[#7ED957]/30 text-[#7ED957] rounded flex items-center justify-center font-mono font-bold text-sm">
+                01
               </div>
-              <h3 className="text-2xl font-semibold text-[#0F2F2A]">Choose Device</h3>
+              <h3 className="text-xl font-bold text-white tracking-wide uppercase">Select Hardware</h3>
             </div>
 
-            <div className="bg-gradient-to-br from-[#0F2F2A] to-[#1A4D44] rounded-2xl p-8 relative overflow-hidden group cursor-pointer hover:scale-[1.02] transition-transform duration-300">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-[#2DD4BF]/10 rounded-full blur-3xl" />
+            <div className="group relative bg-[#022c22]/50 border border-[#7ED957]/20 rounded-2xl p-8 overflow-hidden cursor-pointer transition-all duration-500 hover:border-[#7ED957]/50 hover:shadow-[0_0_30px_-5px_rgba(126,217,87,0.15)]">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#7ED957]/5 blur-3xl rounded-full" />
               
-              <div className="relative flex items-start justify-between">
+              <div className="relative flex flex-col md:flex-row items-start justify-between gap-6">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Camera className="w-10 h-10 text-[#2DD4BF]" />
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="p-3 bg-[#001a14] rounded-lg border border-[#7ED957]/30">
+                      <Camera className="w-8 h-8 text-[#7ED957]" />
+                    </div>
                     <div>
-                      <h4 className="text-2xl font-bold text-white">PESTIQ AI Cam</h4>
-                      <p className="text-sm text-white/70">Professional Grade</p>
+                      <h4 className="text-2xl font-bold text-white tracking-wide">PESTIQ AI Cam <span className="text-[#7ED957] text-xs font-mono border border-[#7ED957]/30 px-1 rounded ml-2">PRO_V3</span></h4>
+                      <p className="text-sm text-[#7ED957]/60 font-mono mt-1">STATUS: AVAILABLE // READY_TO_DEPLOY</p>
                     </div>
                   </div>
 
-                  <ul className="space-y-2 mb-6">
+                  <div className="grid sm:grid-cols-2 gap-3 mb-6">
                     {[
-                      '4K HD Resolution',
-                      'AI-Powered Detection',
-                      'Night Vision',
-                      'Cloud Storage Included',
-                      'Real-time Alerts'
+                      '4K Neural Resolution',
+                      'Bio-Signature Detection',
+                      'Infrared Night Vision',
+                      'Encrypted Cloud Storage',
+                      'Zero-Latency Alerts'
                     ].map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-white/90">
-                        <Check className="w-4 h-4 text-[#2DD4BF]" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
+                      <div key={feature} className="flex items-center gap-2 text-gray-400">
+                        <Check className="w-3 h-3 text-[#7ED957]" />
+                        <span className="text-sm font-light">{feature}</span>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
 
-                  <Badge className="bg-[#2DD4BF] text-[#0F2F2A] border-0">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    Free Hardware Upgrades
-                  </Badge>
+                  <div className="inline-flex items-center gap-2 bg-[#7ED957] text-[#001a14] px-3 py-1 rounded-sm font-bold text-xs tracking-widest uppercase">
+                    <Zap className="w-3 h-3 fill-current" />
+                    Hardware Included
+                  </div>
                 </div>
 
-                <div className="w-12 h-12 bg-[#2DD4BF] rounded-full flex items-center justify-center">
-                  <Check className="w-6 h-6 text-white" />
+                <div className="w-12 h-12 rounded-full border border-[#7ED957] flex items-center justify-center bg-[#7ED957]/20 shadow-[0_0_15px_rgba(126,217,87,0.4)]">
+                  <Check className="w-6 h-6 text-[#7ED957]" />
                 </div>
               </div>
             </div>
           </motion.div>
 
-          {/* Step 2: Select Plan */}
+          {/* Step 2: Configure Protocol (Plan) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="p-8 border-b border-gray-100"
+            className="p-8 border-b border-[#7ED957]/10"
           >
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-[#2DD4BF] text-white rounded-full flex items-center justify-center font-bold text-sm">
-                2
+             <div className="flex items-center gap-3 mb-6">
+              <div className="w-8 h-8 bg-[#7ED957]/10 border border-[#7ED957]/30 text-[#7ED957] rounded flex items-center justify-center font-mono font-bold text-sm">
+                02
               </div>
-              <h3 className="text-2xl font-semibold text-[#0F2F2A]">Select Plan</h3>
+              <h3 className="text-xl font-bold text-white tracking-wide uppercase">Configure Protocol</h3>
             </div>
 
-            {/* Billing toggle */}
-            <div className="flex items-center justify-center mb-8">
-              <div className="inline-flex items-center bg-[#F8FAF9] rounded-full p-1 border border-gray-200">
+            <div className="flex items-center justify-center mb-10">
+              <div className="inline-flex items-center bg-[#001a14] border border-[#7ED957]/20 rounded-full p-1">
                 <button
                   onClick={() => setBillingPeriod('monthly')}
-                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  className={`px-8 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 ${
                     billingPeriod === 'monthly'
-                      ? 'bg-[#0F2F2A] text-white shadow-lg'
-                      : 'text-[#6B7280] hover:text-[#0F2F2A]'
+                      ? 'bg-[#7ED957] text-[#001a14] shadow-[0_0_15px_-3px_rgba(126,217,87,0.5)]'
+                      : 'text-gray-400 hover:text-white'
                   }`}
                 >
-                  <Calendar className="w-4 h-4 inline mr-2" />
                   Monthly
                 </button>
                 <button
                   onClick={() => setBillingPeriod('annual')}
-                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 relative ${
+                  className={`px-8 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 relative ${
                     billingPeriod === 'annual'
-                      ? 'bg-[#0F2F2A] text-white shadow-lg'
-                      : 'text-[#6B7280] hover:text-[#0F2F2A]'
+                      ? 'bg-[#7ED957] text-[#001a14] shadow-[0_0_15px_-3px_rgba(126,217,87,0.5)]'
+                      : 'text-gray-400 hover:text-white'
                   }`}
                 >
-                  <Calendar className="w-4 h-4 inline mr-2" />
                   Annual
                   {billingPeriod === 'annual' && (
-                    <span className="absolute -top-2 -right-2 bg-[#F59E0B] text-white text-xs px-2 py-0.5 rounded-full">
-                      Save
+                    <span className="absolute -top-4 -right-4 bg-[#001a14] text-[#7ED957] text-[9px] border border-[#7ED957]/40 font-mono px-2 py-0.5 rounded shadow-sm">
+                      -17%
                     </span>
                   )}
                 </button>
               </div>
             </div>
 
-            {/* Pricing display */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={billingPeriod}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.3 }}
-                className="bg-gradient-to-br from-[#F8FAF9] to-white rounded-2xl p-8 border border-gray-200"
+                className="bg-gradient-to-b from-[#022c22] to-[#001a14] rounded-2xl p-8 border border-[#7ED957]/20 relative overflow-hidden max-w-lg mx-auto"
               >
-                <div className="text-center">
+                {/* Scanner Line Effect */}
+                <motion.div 
+                    className="absolute top-0 left-0 right-0 h-[2px] bg-[#7ED957]/30 shadow-[0_0_10px_#7ED957]"
+                    animate={{ top: ["0%", "100%"] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                />
+
+                <div className="text-center relative z-10">
                   <div className="flex items-baseline justify-center gap-2 mb-2">
-                    <span className="text-5xl font-bold text-[#0F2F2A]">{currentPlan.price}</span>
-                    <span className="text-lg text-[#6B7280]">{currentPlan.period}</span>
+                    <span className="text-5xl font-mono font-bold text-white tracking-tighter drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">{currentPlan.price}</span>
+                    <span className="text-sm text-[#7ED957]/60 font-mono uppercase">{currentPlan.period}</span>
                   </div>
                   
                   {currentPlan.savings && (
-                    <Badge className="bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/30 mt-2">
+                    <div className="inline-block mt-3 px-4 py-1 rounded bg-[#7ED957]/10 border border-[#7ED957]/30 text-[#7ED957] text-xs font-mono tracking-widest">
                       {currentPlan.savings}
-                    </Badge>
+                    </div>
                   )}
 
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <div className="inline-flex items-center gap-2 text-sm text-[#6B7280]">
-                      <Sparkles className="w-4 h-4 text-[#2DD4BF]" />
-                      <span>Free system & hardware upgrades included</span>
+                  <div className="mt-8 pt-8 border-t border-dashed border-[#7ED957]/20">
+                    <div className="inline-flex items-center gap-2 text-xs font-mono text-gray-400">
+                      <Sparkles className="w-3 h-3 text-[#7ED957]" />
+                      <span>INCLUDES CONTINUOUS OTA FIRMWARE UPGRADES</span>
                     </div>
                   </div>
                 </div>
@@ -182,168 +268,231 @@ export function ProductConfigurator() {
             </AnimatePresence>
           </motion.div>
 
-          {/* Step 3: Choose Action */}
+          {/* Step 3: Initiate Action */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="p-8 bg-gradient-to-br from-[#F8FAF9] to-white"
+            className="p-8 bg-[#001a14]/30"
           >
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-[#2DD4BF] text-white rounded-full flex items-center justify-center font-bold text-sm">
-                3
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-8 h-8 bg-[#7ED957]/10 border border-[#7ED957]/30 text-[#7ED957] rounded flex items-center justify-center font-mono font-bold text-sm">
+                03
               </div>
-              <h3 className="text-2xl font-semibold text-[#0F2F2A]">Choose Action</h3>
+              <h3 className="text-xl font-bold text-white tracking-wide uppercase">Initiate Action</h3>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Request Quotation & Setup */}
+            {/* Action Cards */}
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
+              {/* Quote Card */}
               <motion.div
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedAction('quote')}
-                className={`relative rounded-2xl p-6 border-2 cursor-pointer transition-all duration-300 ${
+                className={`relative rounded-xl p-6 border cursor-pointer transition-all duration-300 group ${
                   selectedAction === 'quote'
-                    ? 'border-[#0F2F2A] bg-[#0F2F2A] text-white shadow-2xl'
-                    : 'border-gray-200 bg-white hover:border-[#2DD4BF] hover:shadow-lg'
+                    ? 'border-[#7ED957] bg-[#7ED957]/10 shadow-[0_0_20px_-5px_rgba(126,217,87,0.3)]'
+                    : 'border-[#7ED957]/10 bg-[#001a14] hover:border-[#7ED957]/50'
                 }`}
               >
-                <div className="flex items-start justify-between mb-4">
+                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h4 className={`text-xl font-semibold mb-2 ${
-                      selectedAction === 'quote' ? 'text-white' : 'text-[#0F2F2A]'
-                    }`}>
-                      Request Quotation & Setup
+                    <h4 className={`text-lg font-bold mb-1 ${selectedAction === 'quote' ? 'text-[#7ED957]' : 'text-white'}`}>
+                      System Installation
                     </h4>
-                    <p className={`text-sm ${
-                      selectedAction === 'quote' ? 'text-white/80' : 'text-[#6B7280]'
-                    }`}>
-                      Get a detailed quote with professional installation service
+                    <p className="text-xs text-gray-500 font-mono">
+                      FULL DEPLOYMENT & CALIBRATION
                     </p>
                   </div>
-                  {selectedAction === 'quote' && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="w-6 h-6 bg-[#2DD4BF] rounded-full flex items-center justify-center"
-                    >
-                      <Check className="w-4 h-4 text-white" />
-                    </motion.div>
-                  )}
+                  <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${
+                      selectedAction === 'quote' ? 'bg-[#7ED957] border-[#7ED957] text-[#001a14]' : 'border-[#7ED957]/30 text-transparent'
+                  }`}>
+                    <Check className="w-3 h-3" />
+                  </div>
                 </div>
-
-                <ul className={`space-y-2 text-sm ${
-                  selectedAction === 'quote' ? 'text-white/90' : 'text-[#6B7280]'
-                }`}>
-                  <li className="flex items-center gap-2">
-                    <Check className={`w-4 h-4 ${
-                      selectedAction === 'quote' ? 'text-[#2DD4BF]' : 'text-[#0F2F2A]'
-                    }`} />
-                    Customized pricing
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className={`w-4 h-4 ${
-                      selectedAction === 'quote' ? 'text-[#2DD4BF]' : 'text-[#0F2F2A]'
-                    }`} />
-                    Professional installation
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className={`w-4 h-4 ${
-                      selectedAction === 'quote' ? 'text-[#2DD4BF]' : 'text-[#0F2F2A]'
-                    }`} />
-                    Priority support
-                  </li>
+                <ul className="space-y-2">
+                    <li className="flex items-center gap-2 text-sm text-gray-400">
+                        <Shield className="w-3 h-3 text-[#7ED957]" /> Tactical Setup
+                    </li>
                 </ul>
               </motion.div>
 
-              {/* Inquiry Only */}
+              {/* Inquiry Card */}
               <motion.div
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedAction('inquiry')}
-                className={`relative rounded-2xl p-6 border-2 cursor-pointer transition-all duration-300 ${
+                className={`relative rounded-xl p-6 border cursor-pointer transition-all duration-300 group ${
                   selectedAction === 'inquiry'
-                    ? 'border-[#2DD4BF] bg-[#2DD4BF] text-[#0F2F2A] shadow-2xl'
-                    : 'border-gray-200 bg-white hover:border-[#2DD4BF] hover:shadow-lg'
+                    ? 'border-[#7ED957] bg-[#7ED957]/10 shadow-[0_0_20px_-5px_rgba(126,217,87,0.3)]'
+                    : 'border-[#7ED957]/10 bg-[#001a14] hover:border-[#7ED957]/50'
                 }`}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h4 className={`text-xl font-semibold mb-2 ${
-                      selectedAction === 'inquiry' ? 'text-[#0F2F2A]' : 'text-[#0F2F2A]'
-                    }`}>
-                      Inquiry Only
+                    <h4 className={`text-lg font-bold mb-1 ${selectedAction === 'inquiry' ? 'text-[#7ED957]' : 'text-white'}`}>
+                      Request Intel
                     </h4>
-                    <p className={`text-sm ${
-                      selectedAction === 'inquiry' ? 'text-[#0F2F2A]/80' : 'text-[#6B7280]'
-                    }`}>
-                      Learn more about our solutions and features
+                    <p className="text-xs text-gray-500 font-mono">
+                      TECHNICAL SPECS & DATASHEETS
                     </p>
                   </div>
-                  {selectedAction === 'inquiry' && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="w-6 h-6 bg-[#0F2F2A] rounded-full flex items-center justify-center"
-                    >
-                      <Check className="w-4 h-4 text-white" />
-                    </motion.div>
-                  )}
+                  <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${
+                      selectedAction === 'inquiry' ? 'bg-[#7ED957] border-[#7ED957] text-[#001a14]' : 'border-[#7ED957]/30 text-transparent'
+                  }`}>
+                    <Check className="w-3 h-3" />
+                  </div>
                 </div>
-
-                <ul className={`space-y-2 text-sm ${
-                  selectedAction === 'inquiry' ? 'text-[#0F2F2A]/90' : 'text-[#6B7280]'
-                }`}>
-                  <li className="flex items-center gap-2">
-                    <Check className={`w-4 h-4 ${
-                      selectedAction === 'inquiry' ? 'text-[#0F2F2A]' : 'text-[#2DD4BF]'
-                    }`} />
-                    Product information
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className={`w-4 h-4 ${
-                      selectedAction === 'inquiry' ? 'text-[#0F2F2A]' : 'text-[#2DD4BF]'
-                    }`} />
-                    Demo request
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className={`w-4 h-4 ${
-                      selectedAction === 'inquiry' ? 'text-[#0F2F2A]' : 'text-[#2DD4BF]'
-                    }`} />
-                    Consultation
-                  </li>
+                <ul className="space-y-2">
+                    <li className="flex items-center gap-2 text-sm text-gray-400">
+                        <MessageSquare className="w-3 h-3 text-[#7ED957]" /> Spec Verification
+                    </li>
                 </ul>
               </motion.div>
             </div>
 
-            {/* Submit button */}
-            <AnimatePresence>
-              {selectedAction && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="mt-8"
+            {/* Dynamic Forms (Dark Mode) */}
+            <AnimatePresence mode="wait">
+              {selectedAction === 'quote' && (
+                <motion.form
+                  key="quote-form"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  onSubmit={handleQuoteSubmit}
+                  className="space-y-4 bg-[#001a14] p-6 rounded-xl border border-[#7ED957]/20"
                 >
-                  <Button
-                    size="lg"
-                    className={`w-full py-6 text-lg font-semibold shadow-2xl transition-all duration-300 ${
-                      selectedAction === 'quote'
-                        ? 'bg-[#0F2F2A] hover:bg-[#2DD4BF] text-white hover:text-[#0F2F2A]'
-                        : 'bg-[#2DD4BF] hover:bg-[#0F2F2A] text-[#0F2F2A] hover:text-white'
-                    }`}
-                  >
-                    {selectedAction === 'quote' ? 'Submit Quote Request' : 'Submit Inquiry'}
-                    <motion.span
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                      className="ml-2"
-                    >
-                      →
-                    </motion.span>
+                  <h4 className="text-sm font-mono font-bold text-[#7ED957] mb-4 border-b border-[#7ED957]/20 pb-2 uppercase tracking-widest">
+                    // Installation Request Data
+                  </h4>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <InputField 
+                        label="Company Name" 
+                        icon={<Building2 className="w-4 h-4 text-[#7ED957]" />}
+                        value={quoteForm.company}
+                        onChange={(v) => setQuoteForm({...quoteForm, company: v})}
+                        placeholder="ACME CORP"
+                    />
+                     <InputField 
+                        label="Contact Person" 
+                        icon={<User className="w-4 h-4 text-[#7ED957]" />}
+                        value={quoteForm.contact}
+                        onChange={(v) => setQuoteForm({...quoteForm, contact: v})}
+                        placeholder="OPERATIVE NAME"
+                    />
+                     <InputField 
+                        label="Secure Email" 
+                        icon={<Mail className="w-4 h-4 text-[#7ED957]" />}
+                        value={quoteForm.email}
+                        onChange={(v) => setQuoteForm({...quoteForm, email: v})}
+                        placeholder="name@server.com"
+                        type="email"
+                    />
+                     <InputField 
+                        label="Comms Line" 
+                        icon={<Phone className="w-4 h-4 text-[#7ED957]" />}
+                        value={quoteForm.phone}
+                        onChange={(v) => setQuoteForm({...quoteForm, phone: v})}
+                        placeholder="+63 900 000 0000"
+                        type="tel"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono font-bold text-[#7ED957]/70 uppercase tracking-wider">Target Coordinates / Address</label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3 pt-3 pointer-events-none">
+                         <MapPin className="w-4 h-4 text-[#7ED957]" />
+                      </div>
+                      <textarea 
+                        required
+                        value={quoteForm.address}
+                        onChange={(e) => setQuoteForm({...quoteForm, address: e.target.value})}
+                        className="w-full pl-10 pr-4 py-2 bg-[#022c22] border border-[#7ED957]/20 rounded text-white text-sm focus:border-[#7ED957] focus:ring-1 focus:ring-[#7ED957] outline-none transition-all resize-none h-24 placeholder:text-gray-600 font-mono"
+                        placeholder="Enter facility location..."
+                      />
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full py-6 mt-4 bg-[#7ED957] hover:bg-[#6BC945] text-[#001a14] font-bold text-sm tracking-widest uppercase rounded-sm transition-all hover:shadow-[0_0_20px_-5px_#7ED957]">
+                    <span className="flex items-center justify-center gap-2">
+                      Initialize Setup <ArrowRight className="w-4 h-4" />
+                    </span>
                   </Button>
-                </motion.div>
+                </motion.form>
+              )}
+
+              {selectedAction === 'inquiry' && (
+                <motion.form
+                  key="inquiry-form"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  onSubmit={handleInquirySubmit}
+                  className="space-y-4 bg-[#001a14] p-6 rounded-xl border border-[#7ED957]/20"
+                >
+                   <h4 className="text-sm font-mono font-bold text-[#7ED957] mb-4 border-b border-[#7ED957]/20 pb-2 uppercase tracking-widest">
+                    // Intel Request
+                  </h4>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                     <InputField 
+                        label="Operative Name" 
+                        icon={<User className="w-4 h-4 text-[#7ED957]" />}
+                        value={inquiryForm.name}
+                        onChange={(v) => setInquiryForm({...inquiryForm, name: v})}
+                        placeholder="NAME"
+                    />
+                    <InputField 
+                        label="Comms Email" 
+                        icon={<Mail className="w-4 h-4 text-[#7ED957]" />}
+                        value={inquiryForm.email}
+                        onChange={(v) => setInquiryForm({...inquiryForm, email: v})}
+                        placeholder="email@server.com"
+                        type="email"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono font-bold text-[#7ED957]/70 uppercase tracking-wider">Subject Matter</label>
+                    <select 
+                      value={inquiryForm.topic}
+                      onChange={(e) => setInquiryForm({...inquiryForm, topic: e.target.value})}
+                      className="w-full px-4 py-2 bg-[#022c22] border border-[#7ED957]/20 rounded text-white text-sm focus:border-[#7ED957] outline-none transition-all font-mono"
+                    >
+                      <option value="specs">Hardware Specifications</option>
+                      <option value="demo">Software Demonstration</option>
+                      <option value="custom">Custom Integration</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono font-bold text-[#7ED957]/70 uppercase tracking-wider">Message Payload</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 pt-3 pointer-events-none">
+                         <MessageSquare className="w-4 h-4 text-[#7ED957]" />
+                      </div>
+                      <textarea 
+                        required
+                        value={inquiryForm.message}
+                        onChange={(e) => setInquiryForm({...inquiryForm, message: e.target.value})}
+                        className="w-full pl-10 pr-4 py-2 bg-[#022c22] border border-[#7ED957]/20 rounded text-white text-sm focus:border-[#7ED957] focus:ring-1 focus:ring-[#7ED957] outline-none transition-all resize-none h-24 placeholder:text-gray-600 font-mono"
+                        placeholder="Query parameters..."
+                      />
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full py-6 mt-4 bg-transparent border border-[#7ED957] text-[#7ED957] hover:bg-[#7ED957]/10 font-bold text-sm tracking-widest uppercase rounded-sm transition-all">
+                    <span className="flex items-center justify-center gap-2">
+                      Transmit Inquiry <ArrowRight className="w-4 h-4" />
+                    </span>
+                  </Button>
+                </motion.form>
               )}
             </AnimatePresence>
           </motion.div>
@@ -352,3 +501,23 @@ export function ProductConfigurator() {
     </section>
   );
 }
+
+// --- HELPER COMPONENT FOR INPUTS (To keep code clean) ---
+const InputField = ({ label, icon, value, onChange, placeholder, type = "text" }: any) => (
+    <div className="space-y-1">
+        <label className="text-[10px] font-mono font-bold text-[#7ED957]/70 uppercase tracking-wider">{label}</label>
+        <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none group-focus-within:text-[#7ED957]">
+                {icon}
+            </div>
+            <input 
+                required
+                type={type} 
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-[#022c22] border border-[#7ED957]/20 rounded text-white text-sm focus:border-[#7ED957] focus:ring-1 focus:ring-[#7ED957] outline-none transition-all placeholder:text-gray-600 font-mono"
+                placeholder={placeholder}
+            />
+        </div>
+    </div>
+);

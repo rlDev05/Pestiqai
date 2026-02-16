@@ -1,15 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PestIQ</title>
 
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Landing Page Design</title>
-    </head>
+    <style>
+      /* --- Loader Container --- */
+      #video-loader {
+        position: fixed;
+        inset: 0;
+        background: black;
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+      }
 
-    <body>
-      <div id="root"></div>
-      <script type="module" src="/src/main.tsx"></script>
-    </body>
-  </html>
-  
+      #loading-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* --- Futuristic Skip Button --- */
+      .skip-btn {
+        position: absolute;
+        bottom: 50px;
+        right: 50px;
+        z-index: 10000;
+        
+        /* Sci-fi styling */
+        background: rgba(0, 20, 40, 0.6);
+        border: 1px solid #00f3ff; /* Neon Cyan */
+        color: #00f3ff;
+        padding: 12px 30px;
+        font-family: 'Courier New', Courier, monospace; /* Tech font */
+        font-size: 14px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        cursor: pointer;
+        
+        /* Glassmorphism & Angled Corners */
+        backdrop-filter: blur(4px);
+        clip-path: polygon(15% 0, 100% 0, 100% 70%, 85% 100%, 0 100%, 0 30%);
+        transition: all 0.3s ease;
+        
+        /* Text shadow for glow */
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+      }
+
+      .skip-btn:hover {
+        background: rgba(0, 243, 255, 0.15);
+        box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+        transform: translateY(-2px);
+      }
+
+      .skip-btn:active {
+        transform: translateY(1px);
+      }
+
+      /* --- Animation Classes --- */
+      .fade-out {
+        opacity: 0;
+        visibility: hidden;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="video-loader">
+      <video
+        id="loading-video"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+      >
+        <source src="src/styles/videos/pestiqvideo.mp4" type="video/mp4" />
+      </video>
+      
+      <button id="skip-btn" class="skip-btn">
+        Skip Initialization &raquo;
+      </button>
+    </div>
+
+    <div id="root"></div>
+
+    <script type="module" src="/src/main.tsx"></script>
+
+    <script>
+      window.addEventListener('load', () => {
+        const loader = document.getElementById('video-loader');
+        const skipBtn = document.getElementById('skip-btn');
+        const video = document.getElementById('loading-video');
+        
+        // Function to hide loader
+        const hideLoader = () => {
+          loader.classList.add('fade-out');
+          
+          // Optional: Pause video after transition to save resources
+          setTimeout(() => {
+            if(video) video.pause();
+          }, 800);
+        };
+
+        // Set the automatic timer
+        const autoTimer = setTimeout(hideLoader, 7500);
+
+        // Add functionality to the skip button
+        skipBtn.addEventListener('click', () => {
+          // Clear the auto timer so it doesn't fire twice
+          clearTimeout(autoTimer);
+          hideLoader();
+        });
+      });
+    </script>
+  </body>
+</html>
