@@ -1,5 +1,6 @@
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { MapPin, Mail, Phone, ArrowRight, ShieldCheck, Zap, Lock } from 'lucide-react';
+import { MapPin, Mail, Phone, ArrowRight, ShieldCheck, Zap, Lock, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 
@@ -8,6 +9,38 @@ import { Input } from './ui/input';
 import logoImg from "../../styles/images/pestiqlogo.png";
 
 export function Footer() {
+  // --- MODAL STATE ---
+  const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; type: 'terms' | 'privacy' | null }>({ 
+    isOpen: false, 
+    type: null 
+  });
+
+  const openModal = (e: React.MouseEvent, type: 'terms' | 'privacy') => {
+    e.preventDefault();
+    setModalConfig({ isOpen: true, type });
+  };
+
+  const closeModal = () => setModalConfig({ isOpen: false, type: null });
+
+  // Modal content based on what was clicked
+  const getModalContent = () => {
+    if (modalConfig.type === 'terms') {
+      return {
+        title: "Terms of Service",
+        body: "By accessing the Pestiq AI system, you agree to our operational guidelines. Deployment is currently limited to approved zones. Unauthorized reverse engineering of our neural network parameters or tampering with perimeter hardware is strictly prohibited."
+      };
+    }
+    if (modalConfig.type === 'privacy') {
+      return {
+        title: "Privacy Policy",
+        body: "Your data security is our top priority. Pestiq AI utilizes encryption for all sensor data and perimeter scans. We do not sell your telemetry or property data to third parties. All processing is localized where possible."
+      };
+    }
+    return { title: "", body: "" };
+  };
+
+  const modalContent = getModalContent();
+
   return (
     <footer className="relative overflow-hidden bg-[#111111] text-white border-t border-[#7ED957]/20">
       {/* Background Gradient Mesh - Futuristic touch */}
@@ -63,11 +96,11 @@ export function Footer() {
             <h4 className="text-[#7ED957] text-sm font-semibold uppercase tracking-wider mb-6">Connect</h4>
             <ul className="space-y-4">
               <li className="group">
-                <a href="mailto:hello@pestiq.ai" className="flex items-center gap-3 text-sm text-white/60 group-hover:text-white transition-colors duration-200">
+                <a href="mailto:pestiqai@gmail.com" className="flex items-center gap-3 text-sm text-white/60 group-hover:text-white transition-colors duration-200">
                   <div className="p-2 rounded-lg bg-white/5 group-hover:bg-[#7ED957]/20 transition-colors">
                     <Mail className="w-4 h-4 text-[#7ED957]" />
                   </div>
-                  hello@pestiq.ai
+                  pestiqai@gmail.com
                 </a>
               </li>
               <li className="group">
@@ -147,17 +180,65 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Copyright */}
+        {/* Copyright & Links */}
         <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/5 gap-4">
           <p className="text-xs text-white/30">
             © 2026 PESTIQ AI. <span className="text-[#0F3D2E]">_</span> System Version 2.0
           </p>
           <div className="flex gap-6">
-             <a href="#" className="text-xs text-white/30 hover:text-[#7ED957] transition-colors">Terms of Service</a>
-             <a href="#" className="text-xs text-white/30 hover:text-[#7ED957] transition-colors">Privacy Policy</a>
+             <a href="#" onClick={(e) => openModal(e, 'terms')} className="text-xs text-white/30 hover:text-[#7ED957] transition-colors">Terms of Service</a>
+             <a href="#" onClick={(e) => openModal(e, 'privacy')} className="text-xs text-white/30 hover:text-[#7ED957] transition-colors">Privacy Policy</a>
           </div>
         </div>
       </div>
+
+      {/* --- MODAL UI OVERLAY --- */}
+      {modalConfig.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={closeModal}
+          />
+          
+          {/* Modal Box */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="relative w-full max-w-lg bg-[#111111] border border-[#7ED957]/30 rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(126,217,87,0.15)] z-10"
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-5 border-b border-white/5 bg-[#0F3D2E]/20">
+              <h3 className="text-[#7ED957] font-semibold tracking-wide flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4" />
+                {modalContent.title}
+              </h3>
+              <button 
+                onClick={closeModal}
+                className="text-white/40 hover:text-white hover:bg-white/5 p-1.5 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Modal Body */}
+            <div className="p-6">
+              <p className="text-sm text-white/70 leading-relaxed">
+                {modalContent.body}
+              </p>
+              
+              <div className="mt-8 flex justify-end">
+                <Button 
+                  onClick={closeModal}
+                  className="bg-[#7ED957]/10 text-[#7ED957] border border-[#7ED957]/20 hover:bg-[#7ED957] hover:text-[#0F3D2E] transition-all h-9 text-xs font-semibold px-6"
+                >
+                  Acknowledge
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </footer>
   );
 }
