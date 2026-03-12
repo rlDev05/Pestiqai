@@ -8,14 +8,13 @@ import mysql from 'mysql2/promise';
 dotenv.config();
 
 const app = express();
-
 app.use(express.json());
 
-// CORS configuration - allowing your main site to talk to the API
+// CORS configuration
 app.use(cors({
   origin: [
-    'https://pestiq.net', 
-    'https://www.pestiq.net', 
+    'https://pestiq.net',
+    'https://www.pestiq.net',
     'http://localhost:5173',
     'http://localhost:3000'
   ],
@@ -23,7 +22,7 @@ app.use(cors({
   credentials: true
 }));
 
-// Database Connection Pool
+// DATABASE CONNECTION
 const pool = mysql.createPool({
   host: '127.0.0.1',
   user: process.env.DB_USER,
@@ -34,21 +33,27 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-// Notice the route is just '/send-email' to match your frontend fetch
 app.post('/send-email', async (req, res) => {
   try {
+
     const { type, data } = req.body;
     const { name, email, topic, message, device } = data;
 
+    // =========================
     // 1. SAVE TO DATABASE
+    // =========================
     const insertQuery = `
-      INSERT INTO inquiries (name, email, topic, device, message) 
+      INSERT INTO inquiries (name, email, topic, device, message)
       VALUES (?, ?, ?, ?, ?)
     `;
+
     await pool.execute(insertQuery, [name, email, topic, device, message]);
+
     console.log('Inquiry saved to database successfully.');
 
+    // =========================
     // 2. CONFIGURE NODEMAILER
+    // =========================
     const transporter = nodemailer.createTransport({
       host: 'smtp.hostinger.com',
       port: 465,
@@ -59,25 +64,67 @@ app.post('/send-email', async (req, res) => {
       },
     });
 
-    // 3. Email going TO YOU
+    // =========================
+    // 3. EMAIL TO ADMIN
+    // =========================
     const mailToAdmin = {
-      from: process.env.EMAIL_USER,
+      from: `"PESTIQ Website" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_USER,
       replyTo: email,
       subject: `New Inquiry from ${name} - Topic: ${topic}`,
-      text: `Name: ${name}\nEmail: ${email}\nTopic: ${topic}\nDevice: ${device}\nMessage: ${message}`,
+      text: `
+Name: ${name}
+Email: ${email}
+Topic: ${topic}
+Device: ${device}
+
+Message:
+${message}
+      `,
     };
 
-    // 4. Send email
-    await transporter.sendMail(mailToAdmin);
+    // =========================
+    // 4. AUTO REPLY TO CLIENT
+    // =========================
+    const mailToClient = {
+      from: `"PESTIQ Team" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: `We received your inquiry, ${name}!`,
+      text: `
+Hi ${name},
 
-    res.status(200).json({ success: true, message: 'Saved to DB & Emails sent successfully!' });
+Thank you for reaching out to PESTIQ regarding "${topic}".
+
+We have received your message and our team will get back to you as soon as possible.
+
+Here is a copy of what you sent us:
+
+"${message}"
+
+Best regards,
+The PESTIQ Team
+      `,
+    };
+
+    // =========================
+    // 5. SEND BOTH EMAILS
+    // =========================
+    await transporter.sendMail(mailToAdmin);
+    await transporter.sendMail(mailToClient);
+
+    console.log("Admin and client emails sent successfully.");
+
+    res.status(200).json({
+      success: true,
+      message: 'Saved to DB & Emails sent successfully!'
+    });
 
   } catch (error) {
+
     console.error('Error processing inquiry:', error);
-    // TEMPORARY DEBUGGING: Send the actual error back to the frontend
-    res.status(500).json({ 
-      success: false, 
+
+    res.status(500).json({
+      success: false,
       message: 'Failed to process inquiry.',
       exact_error: error.message,
       error_stack: error.stack
@@ -86,7 +133,7 @@ app.post('/send-email', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  // Hostinger handles the ports, so we just log that it started
-  console.log(`Backend server is running and listening for Hostinger traffic on port ${PORT}`);
+  console.log(`Backend server is running on port ${PORT}`);
 });
