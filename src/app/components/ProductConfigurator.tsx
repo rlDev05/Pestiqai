@@ -51,7 +51,8 @@ export function ProductConfigurator() {
     setSubmissionStatus({ type: null, message: '' });
 
     try {
-      const response = await fetch('https://pestiq.net/api/send-email', {
+      // Point this to your new backend subdomain
+const response = await fetch('https://api.pestiq.net/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
