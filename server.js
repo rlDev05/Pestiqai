@@ -83,26 +83,47 @@ ${message}
       `,
     };
 
-    // =========================
+   // =========================
     // 4. AUTO REPLY TO CLIENT
     // =========================
     const mailToClient = {
-      from: `"PESTIQ Team" <${process.env.EMAIL_USER}>`,
+      from: `"PESTIQ Systems" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: `We received your inquiry, ${name}!`,
-      text: `
-Hi ${name},
+      subject: `System Notification: Inquiry Received [${topic}]`,
+      // Plain text fallback for older email clients
+      text: `Hi ${name},\n\nThank you for reaching out to PESTIQ regarding "${topic}".\n\nWe have received your message and our team will get back to you as soon as possible.\n\nHere is a copy of what you sent us:\n"${message}"\n\nBest regards,\nThe PESTIQ Team`,
+      // HTML version with Dark Green Techy Theme
+      html: `
+        <div style="font-family: 'Courier New', Courier, monospace; background-color: #0b1410; padding: 40px 20px; color: #e0e0e0;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #111d18; border: 1px solid #1e3329; border-top: 4px solid #2ecc71; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+            
+            <div style="padding: 25px; text-align: center; border-bottom: 1px solid #1e3329; background-color: #0d1713;">
+              <h1 style="color: #2ecc71; margin: 0; font-size: 28px; letter-spacing: 3px;">PESTIQ</h1>
+              <p style="color: #6a9981; font-size: 12px; margin: 5px 0 0 0; letter-spacing: 1px;">// SECURE COMM LINK ESTABLISHED</p>
+            </div>
+            
+            <div style="padding: 30px;">
+              <h2 style="color: #ffffff; font-size: 18px; border-bottom: 1px dashed #2ecc71; padding-bottom: 10px; display: inline-block;">INQUIRY LOGGED</h2>
+              
+              <p style="font-size: 15px; line-height: 1.6; margin-top: 20px;">User: <strong style="color: #2ecc71;">${name}</strong></p>
+              
+              <p style="font-size: 15px; line-height: 1.6;">Thank you for initiating contact with PESTIQ regarding <strong>"${topic}"</strong>. Our system has successfully recorded your data transmission. Our team is currently reviewing your request and will respond shortly.</p>
 
-Thank you for reaching out to PESTIQ regarding "${topic}".
+              <div style="background-color: #0b1410; padding: 15px; border-left: 3px solid #2ecc71; margin: 30px 0; border-radius: 0 4px 4px 0;">
+                <p style="margin: 0; font-size: 12px; color: #6a9981; margin-bottom: 8px;">> DECRYPTED MESSAGE PAYLOAD:</p>
+                <p style="margin: 0; font-style: italic; color: #c4d4cc; font-size: 14px; line-height: 1.5;">"${message}"</p>
+              </div>
 
-We have received your message and our team will get back to you as soon as possible.
+              <p style="font-size: 15px; line-height: 1.6; color: #2ecc71;">> STATUS: Awaiting Admin Response...</p>
+            </div>
+            
+            <div style="background-color: #080f0c; padding: 20px; text-align: center; font-size: 12px; color: #527562;">
+              <p style="margin: 0;">&copy; ${new Date().getFullYear()} PESTIQ Systems. All rights reserved.</p>
+              <p style="margin: 8px 0 0 0;">This is an automated system notification. Please do not reply directly to this transmission.</p>
+            </div>
 
-Here is a copy of what you sent us:
-
-"${message}"
-
-Best regards,
-The PESTIQ Team
+          </div>
+        </div>
       `,
     };
 
