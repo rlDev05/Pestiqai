@@ -75,7 +75,13 @@ app.post('/send-email', async (req, res) => {
 
   } catch (error) {
     console.error('Error processing inquiry:', error);
-    res.status(500).json({ success: false, message: 'Failed to process inquiry.' });
+    // TEMPORARY DEBUGGING: Send the actual error back to the frontend
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to process inquiry.',
+      exact_error: error.message,
+      error_stack: error.stack
+    });
   }
 });
 
