@@ -83,41 +83,50 @@ ${message}
       `,
     };
 
-   // =========================
+// =========================
     // 4. AUTO REPLY TO CLIENT
     // =========================
     const mailToClient = {
       from: `"PESTIQ" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: `We've received your message! [${topic}]`,
+      subject: `We got your message! [${topic}]`,
       // Plain text fallback for older email clients
-      text: `Hi ${name},\n\nThanks for reaching out to PESTIQ about "${topic}".\n\nWe've received your message and our team will get back to you as quickly as possible.\n\nHere is a copy of what you sent us:\n"${message}"\n\nBest regards,\nThe PESTIQ Team`,
-      // HTML version with Dark Green Techy Theme (Layman friendly!)
+      text: `Hi ${name},\n\nThank you for reaching out to PESTIQ about "${topic}"!\n\nWe just wanted to send a quick note to say we received your message safely. One of our team members will review it and get back to you shortly.\n\nHere is what you sent us:\n"${message}"\n\nBest,\nThe PESTIQ Team`,
+      // HTML version with Light, Clean, Layman-friendly Theme
       html: `
-        <div style="font-family: 'Courier New', Courier, monospace; background-color: #0b1410; padding: 40px 20px; color: #e0e0e0;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: #111d18; border: 1px solid #1e3329; border-top: 4px solid #2ecc71; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+        <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f7f6; padding: 40px 20px; color: #333333;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e1e8ed; border-top: 4px solid #10b981; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
             
-            <div style="padding: 25px; text-align: center; border-bottom: 1px solid #1e3329; background-color: #0d1713;">
-              <h1 style="color: #2ecc71; margin: 0; font-size: 28px; letter-spacing: 3px;">PESTIQ</h1>
-              <p style="color: #6a9981; font-size: 12px; margin: 5px 0 0 0; letter-spacing: 1px;">// CONFIRMATION RECEIPT</p>
+            <div style="padding: 30px; text-align: center; border-bottom: 1px solid #f0f4f8; background-color: #ffffff;">
+              <h1 style="color: #10b981; margin: 0; font-size: 26px; font-weight: bold; letter-spacing: 1px;">PESTIQ</h1>
+              <p style="color: #718096; font-size: 13px; margin: 8px 0 0 0; text-transform: uppercase; letter-spacing: 1px;">Message Received</p>
             </div>
             
-            <div style="padding: 30px;">
-              <h2 style="color: #ffffff; font-size: 18px; border-bottom: 1px dashed #2ecc71; padding-bottom: 10px; display: inline-block;">Hi ${name},</h2>
+            <div style="padding: 30px 40px;">
+              <h2 style="color: #2d3748; font-size: 20px; font-weight: 600; margin-top: 0;">Hi ${name},</h2>
               
-              <p style="font-size: 15px; line-height: 1.6; margin-top: 20px;">Thanks for reaching out to PESTIQ about <strong>"${topic}"</strong>. We want to let you know that your message safely reached our inbox. Our team will review it and get back to you as quickly as possible!</p>
+              <p style="font-size: 16px; line-height: 1.6; color: #4a5568; margin-top: 15px;">
+                Thank you for reaching out to us about <strong>"${topic}"</strong>! We just wanted to send a quick note to let you know that your message safely reached our inbox. 
+              </p>
+              
+              <p style="font-size: 16px; line-height: 1.6; color: #4a5568;">
+                One of our team members will take a look and get back to you as soon as possible.
+              </p>
 
-              <div style="background-color: #0b1410; padding: 15px; border-left: 3px solid #2ecc71; margin: 30px 0; border-radius: 0 4px 4px 0;">
-                <p style="margin: 0; font-size: 12px; color: #6a9981; margin-bottom: 8px;">> YOUR MESSAGE:</p>
-                <p style="margin: 0; font-style: italic; color: #c4d4cc; font-size: 14px; line-height: 1.5;">"${message}"</p>
+              <div style="background-color: #f8fafc; padding: 20px; border-left: 4px solid #10b981; margin: 30px 0; border-radius: 4px;">
+                <p style="margin: 0 0 10px 0; font-size: 13px; color: #718096; text-transform: uppercase; font-weight: bold;">Here's what you sent us:</p>
+                <p style="margin: 0; font-style: italic; color: #4a5568; font-size: 15px; line-height: 1.6;">"${message}"</p>
               </div>
 
-              <p style="font-size: 15px; line-height: 1.6; color: #2ecc71;">> Status: Our team is on it!</p>
+              <p style="font-size: 16px; line-height: 1.6; color: #4a5568; margin-bottom: 0;">
+                Best,<br>
+                <strong>The PESTIQ Team</strong>
+              </p>
             </div>
             
-            <div style="background-color: #080f0c; padding: 20px; text-align: center; font-size: 12px; color: #527562;">
+            <div style="background-color: #f8fafc; padding: 20px; text-align: center; font-size: 13px; color: #a0aec0; border-top: 1px solid #e1e8ed;">
               <p style="margin: 0;">&copy; ${new Date().getFullYear()} PESTIQ. All rights reserved.</p>
-              <p style="margin: 8px 0 0 0;">This is an automated email to confirm we received your message. Please do not reply directly to this email.</p>
+              <p style="margin: 10px 0 0 0;">This is an automated email just to let you know we're on it. Please do not reply directly to this message.</p>
             </div>
 
           </div>
