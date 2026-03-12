@@ -1,264 +1,147 @@
 import express from 'express';
+import nodemailer from 'nodemailer';
 import cors from 'cors';
-import { Resend } from 'resend';
 import dotenv from 'dotenv';
+import mysql from 'mysql2/promise'; // <-- Import mysql2
 
+// Load environment variables from your .env file
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
 app.use(express.json());
+app.use(cors());
 
-// Initialize Resend with API key validation
-const resend = new Resend(process.env.RESEND_API_KEY);
+// --- Database Connection Pool ---
+// This connects to your XAMPP MySQL database using .env variables
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
-// Rate limiting map (in-memory for Express)
-const rateLimitMap = new Map();
-
-function checkRateLimit(ip) {
-  const now = Date.now();
-  const windowMs = 15 * 60 * 1000; // 15 minutes
-  const maxRequests = 5;
-
-  const record = rateLimitMap.get(ip);
-
-  if (!record || now > record.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + windowMs });
-    return true;
-  }
-
-  if (record.count >= maxRequests) {
-    return false;
-  }
-
-  record.count++;
-  return true;
-}
-
-// Generate the beautiful HTML template based on your provided design
-function generateEmailTemplate(type, data) {
-  const timestamp = new Date().toLocaleString('en-US', {
-    timeZone: 'Asia/Manila',
-    year: 'numeric', month: 'long', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
-
-  // Extract variables based on whether it's a quote or inquiry
-  const name = data.contact || data.name || 'Unknown User';
-  const email = data.email || 'No email provided';
-  const subject = type === 'quote' ? 'System Installation Request' : 'Intel / Specs Request';
-  
-  // Build dynamic fields safely
-  const companyBlock = data.company ? `
-    <div style="display: flex; align-items: center; margin-bottom: 16px;">
-      <div style="width: 8px; height: 8px; background-color: #7ED957; border-radius: 50%; margin-right: 12px; flex-shrink: 0;"></div>
-      <div>
-        <div style="color: #6c757d; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Company</div>
-        <div style="color: #1a1a1a; font-weight: 500;">${data.company}</div>
-      </div>
-    </div>` : '';
-
-  const phoneBlock = data.phone ? `
-    <div style="display: flex; align-items: center; margin-bottom: 16px;">
-      <div style="width: 8px; height: 8px; background-color: #7ED957; border-radius: 50%; margin-right: 12px; flex-shrink: 0;"></div>
-      <div>
-        <div style="color: #6c757d; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Phone</div>
-        <a href="tel:${data.phone}" style="color: #15803d; text-decoration: none; font-weight: 500;">${data.phone}</a>
-      </div>
-    </div>` : '';
-
-  const addressBlock = data.address ? `
-    <div style="display: flex; align-items: center; margin-bottom: 16px;">
-      <div style="width: 8px; height: 8px; background-color: #7ED957; border-radius: 50%; margin-right: 12px; flex-shrink: 0;"></div>
-      <div>
-        <div style="color: #6c757d; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Address / Coordinates</div>
-        <div style="color: #1a1a1a; font-weight: 500;">${data.address}</div>
-      </div>
-    </div>` : '';
-
-  const messageBlock = data.message ? `
-    <div style="margin-bottom: 32px;">
-      <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">Message / Payload</h2>
-      <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 24px;">
-        <p style="white-space: pre-wrap; color: #495057; margin: 0; font-size: 15px; line-height: 1.6;">${data.message}</p>
-      </div>
-    </div>` : '';
-
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>New PESTIQ AI Transmission</title>
-    </head>
-    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f8f9fa; line-height: 1.6;">
-      
-      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
-        
-        <div style="background: linear-gradient(135deg, #15803d 0%, #001a14 100%); padding: 40px 32px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.025em;">New ${type.toUpperCase()} Transmission</h1>
-          <p style="color: #7ED957; margin: 8px 0 0 0; font-size: 14px; font-family: monospace;">PESTIQ AI SYSTEMS</p>
-        </div>
-        
-        <div style="padding: 40px 32px;">
-          
-          <div style="background-color: #f0fdf4; color: #15803d; padding: 12px 16px; border-radius: 8px; margin-bottom: 32px; display: flex; align-items: center; font-size: 14px; font-weight: 500; border-left: 4px solid #7ED957;">
-            New secure data received from configuration terminal
-          </div>
-          
-          <div style="margin-bottom: 32px;">
-            <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">Hardware & Target Data</h2>
-            <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 24px;">
-              <div style="display: grid; gap: 16px;">
-                
-                <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                  <div style="width: 8px; height: 8px; background-color: #7ED957; border-radius: 50%; margin-right: 12px; flex-shrink: 0;"></div>
-                  <div>
-                    <div style="color: #6c757d; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Operative Name</div>
-                    <div style="color: #1a1a1a; font-weight: 500;">${name}</div>
-                  </div>
-                </div>
-                
-                <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                  <div style="width: 8px; height: 8px; background-color: #7ED957; border-radius: 50%; margin-right: 12px; flex-shrink: 0;"></div>
-                  <div>
-                    <div style="color: #6c757d; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Email</div>
-                    <a href="mailto:${email}" style="color: #15803d; text-decoration: none; font-weight: 500;">${email}</a>
-                  </div>
-                </div>
-
-                ${companyBlock}
-                ${phoneBlock}
-                ${addressBlock}
-                
-                <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                  <div style="width: 8px; height: 8px; background-color: #7ED957; border-radius: 50%; margin-right: 12px; flex-shrink: 0;"></div>
-                  <div>
-                    <div style="color: #6c757d; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Device Configuration</div>
-                    <div style="color: #1a1a1a; font-weight: 500;">${data.device} (${data.plan} plan)</div>
-                  </div>
-                </div>
-
-                <div style="display: flex; align-items: center;">
-                  <div style="width: 8px; height: 8px; background-color: #7ED957; border-radius: 50%; margin-right: 12px; flex-shrink: 0;"></div>
-                  <div>
-                    <div style="color: #6c757d; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">Subject</div>
-                    <div style="color: #1a1a1a; font-weight: 500;">${subject} ${data.topic ? `- ${data.topic}` : ''}</div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-          
-          ${messageBlock}
-          
-          <div style="margin-bottom: 32px;">
-            <h2 style="color: #1a1a1a; margin: 0 0 16px 0; font-size: 16px; font-weight: 600;">Quick Actions</h2>
-            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-              <a href="mailto:${email}?subject=Re: PESTIQ AI ${subject}" style="background-color: #15803d; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; transition: background-color 0.2s;">
-                Reply to ${name}
-              </a>
-            </div>
-          </div>
-          
-          <div style="border-top: 1px solid #e9ecef; padding-top: 24px; text-align: center;">
-            <div style="color: #6c757d; font-size: 14px; margin-bottom: 8px;">
-              Submitted on ${timestamp}
-            </div>
-            <div style="color: #adb5bd; font-size: 12px;">
-              Data transmitted from PESTIQ AI Configuration Terminal
-            </div>
-          </div>
-          
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-}
-
-// --- EMAIL ENDPOINT ---
 app.post('/api/send-email', async (req, res) => {
   try {
-    // 1. Rate Limiting Check
-    const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-    if (!checkRateLimit(clientIP)) {
-      return res.status(429).json({
-        success: false,
-        message: 'Too many requests. Please try again later.',
-      });
-    }
-
-    // 2. Validate Env
-    if (!process.env.RESEND_API_KEY) {
-      console.error('RESEND_API_KEY is not configured');
-      return res.status(500).json({ success: false, message: 'Server configuration error.' });
-    }
-
     const { type, data } = req.body;
+    const { name, email, topic, message, device } = data;
 
-    // 3. Validate Payload
-    if (!type || !data || !data.email) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid payload',
-      });
-    }
-
-    // 4. Send Email to Admin via Resend
-    const adminEmailPromise = resend.emails.send({
-      from: 'PESTIQ AI <onboarding@resend.dev>', // Note: Update this if you have a verified domain in Resend
-      to: process.env.EMAIL_TO || 'pestiqai@gmail.com',
-      replyTo: data.email,
-      subject: `[PESTIQ AI] New ${type.toUpperCase()} Request from ${data.contact || data.name}`,
-      html: generateEmailTemplate(type, data),
-    });
-
-    // Add a timeout just like your reference code
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Email request timeout')), 10000)
-    );
-
-    const result = await Promise.race([adminEmailPromise, timeoutPromise]);
+    // ==========================================
+    // 1. SAVE TO XAMPP MYSQL DATABASE FIRST
+    // ==========================================
+    const insertQuery = `
+      INSERT INTO inquiries (name, email, topic, device, message) 
+      VALUES (?, ?, ?, ?, ?)
+    `;
     
-    if (result.error) {
-      console.error('Resend error:', result.error);
-      return res.status(500).json({ success: false, message: 'Failed to send email.' });
-    }
+    // Execute the query. The '?' placeholders protect against SQL injection.
+    await pool.execute(insertQuery, [name, email, topic, device, message]);
+    console.log('Inquiry saved to database successfully.');
 
-    console.log(`✅ Transmission successful to admin from ${data.email}`);
+    // ==========================================
+    // 2. CONFIGURE NODEMAILER
+    // ==========================================
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.hostinger.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-    // (Optional) Send a simple text confirmation back to the client
-    await resend.emails.send({
-      from: 'PESTIQ AI <onboarding@resend.dev>', 
-      to: data.email,
-      subject: 'Transmission Received – PESTIQ AI',
-      html: `
-        <h2>Request Received</h2>
-        <p>Hi ${data.contact || data.name || 'Operative'},</p>
-        <p>Your data transmission has been secured and received by our team.</p>
-        <p><strong>Hardware:</strong> ${data.device}</p>
-        <p><strong>Protocol:</strong> ${data.plan}</p>
-        <br />
-        <p>— PESTIQ AI Team</p>
+    // 3. Email going TO YOU (Admin Alert)
+    const mailToAdmin = {
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER,
+      replyTo: email,
+      subject: `New Inquiry from ${name} - Topic: ${topic}`,
+      text: `
+        New Inquiry Details:
+        Name: ${name}
+        Email: ${email}
+        Topic: ${topic}
+        Device: ${device}
+        
+        Message:
+        ${message}
       `,
-    });
+    };
 
-    res.status(200).json({ success: true, message: 'Email sent successfully' });
+    // 4. Email going TO THE USER (Auto-reply with Techy Dark Theme)
+    const autoReplyToUser = {
+      from: `"PESTIQ Support" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: `Transmission Received: ${device} Inquiry [PESTIQ SYSTEM]`,
+      text: `Hi ${name},\n\nSystem initialized. We received your message regarding the ${device} (${topic}). Our team will get back to you shortly.\n\nYour message log:\n"${message}"\n\nThe PESTIQ Team`,
+      html: `
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#001a14" style="background-color: #001a14; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+          <tr>
+            <td align="center" style="padding: 40px 20px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#022c22" style="max-width: 500px; background-color: #022c22; border: 1px solid rgba(126, 217, 87, 0.4); border-radius: 12px; overflow: hidden;">
+                
+                <tr>
+                  <td style="padding: 24px; border-bottom: 1px solid rgba(126, 217, 87, 0.2);">
+                    <h2 style="color: #7ED957; margin: 0; font-family: monospace; letter-spacing: 2px; text-transform: uppercase; font-size: 18px;">
+                      <span style="color: #4a8033;"></span> PESTIQ SUPPORT
+                    </h2>
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td style="padding: 24px;">
+                    <p style="color: #ffffff; font-size: 16px; margin-top: 0;">Hi ${name},</p>
+                    
+                    <p style="color: #9ca3af; font-size: 14px; line-height: 1.6;">
+                      System initialized. We have successfully received your inquiry regarding the 
+                      <strong style="color: #7ED957; font-weight: bold;">${device}</strong> 
+                      (<span style="color: #e5e7eb;">${topic}</span>). 
+                      Our support team is processing your data and will transmit a response shortly.
+                    </p>
+                    
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#001a14" style="margin: 24px 0; border-left: 3px solid #7ED957; border-radius: 0 4px 4px 0;">
+                      <tr>
+                        <td style="padding: 16px;">
+                          <p style="color: #7ED957; margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-family: monospace;">
+                            Your Message:
+                          </p>
+                          <p style="color: #9ca3af; font-family: monospace; font-size: 13px; line-height: 1.5; margin: 0;">
+                            "${message}"
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <p style="color: #9ca3af; font-size: 14px; margin-bottom: 0;">
+                      <br>
+                      <strong style="color: #7ED957; font-weight: bold;">The PESTIQ Team</strong>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      `
+    };
 
-  } catch (err) {
-    console.error('❌ EMAIL SERVER ERROR:', err);
-    res.status(500).json({
-      success: false,
-      message: 'Email server failed',
-    });
+    // 5. Send both emails
+    await transporter.sendMail(mailToAdmin);
+    await transporter.sendMail(autoReplyToUser);
+
+    res.status(200).json({ success: true, message: 'Saved to DB & Emails sent successfully!' });
+
+  } catch (error) {
+    console.error('Error processing inquiry:', error);
+    res.status(500).json({ success: false, message: 'Failed to process inquiry.' });
   }
 });
 
-// --- START SERVER ---
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`✅ Resend Email Server running at http://localhost:${PORT}`);
+  console.log(`Backend server running on https://pestiq.net:${PORT}`);
 });

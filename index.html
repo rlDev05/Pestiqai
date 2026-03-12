@@ -1,123 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PestIQ</title>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PestIQ</title>
 
-    <style>
-      /* --- Loader Container --- */
-      #video-loader {
-        position: fixed;
-        inset: 0;
-        background: black;
-        z-index: 9999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
-      }
+<style>
+/* --- Loader Container --- */
+#app-loader {
+  position: fixed;
+  inset: 0;
+  background: black;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+  overflow: hidden;
+}
 
-      #loading-video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
+/* --- Animated Image --- */
+#loading-image {
+  width: 55%;          /* smaller = zoomed out */
+  max-width: 700px;
+  height: auto;
+  object-fit: contain;
 
-      /* --- Futuristic Skip Button --- */
-      .skip-btn {
-        position: absolute;
-        bottom: 50px;
-        right: 50px;
-        z-index: 10000;
-        
-        /* Sci-fi styling */
-        background: rgba(0, 20, 40, 0.6);
-        border: 1px solid #00f3ff; /* Neon Cyan */
-        color: #00f3ff;
-        padding: 12px 30px;
-        font-family: 'Courier New', Courier, monospace; /* Tech font */
-        font-size: 14px;
-        font-weight: bold;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        cursor: pointer;
-        
-        /* Glassmorphism & Angled Corners */
-        backdrop-filter: blur(4px);
-        clip-path: polygon(15% 0, 100% 0, 100% 70%, 85% 100%, 0 100%, 0 30%);
-        transition: all 0.3s ease;
-        
-        /* Text shadow for glow */
-        text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
-      }
+  /* removes white background visually */
+  mix-blend-mode: screen;
 
-      .skip-btn:hover {
-        background: rgba(0, 243, 255, 0.15);
-        box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
-        transform: translateY(-2px);
-      }
+  animation: sciFiZoom 6s ease-in-out infinite alternate;
+}
 
-      .skip-btn:active {
-        transform: translateY(1px);
-      }
+/* --- Animation --- */
+@keyframes sciFiZoom {
+  0% {
+    transform: scale(0.9); /* starts slightly zoomed out */
+    filter: brightness(0.9);
+  }
 
-      /* --- Animation Classes --- */
-      .fade-out {
-        opacity: 0;
-        visibility: hidden;
-      }
-    </style>
-  </head>
+  100% {
+    transform: scale(1.05); /* subtle zoom */
+    filter: brightness(1.1);
+  }
+}
 
-  <body>
-    <div id="video-loader">
-      <video
-        id="loading-video"
-        autoplay
-        muted
-        loop
-        playsinline
-        preload="auto"
-      >
-        <source src="src/styles/videos/pestiqvideo.mp4" type="video/mp4" />
-      </video>
-      
-      <button id="skip-btn" class="skip-btn">
-        Skip Initialization &raquo;
-      </button>
-    </div>
+/* --- Fade Out --- */
+.fade-out {
+  opacity: 0;
+  visibility: hidden;
+}
+</style>
+</head>
 
-    <div id="root"></div>
+<body>
 
-    <script type="module" src="/src/main.tsx"></script>
+<div id="app-loader">
+<img
+id="loading-image"
+src="src/styles/images/PESTIQ-logo-sample-RCG-white.png"
+alt="PestIQ Initialization"
+/>
+</div>
 
-    <script>
-      window.addEventListener('load', () => {
-        const loader = document.getElementById('video-loader');
-        const skipBtn = document.getElementById('skip-btn');
-        const video = document.getElementById('loading-video');
-        
-        // Function to hide loader
-        const hideLoader = () => {
-          loader.classList.add('fade-out');
-          
-          // Optional: Pause video after transition to save resources
-          setTimeout(() => {
-            if(video) video.pause();
-          }, 800);
-        };
+<div id="root"></div>
 
-        // Set the automatic timer
-        const autoTimer = setTimeout(hideLoader, 7500);
+<script type="module" src="/src/main.tsx"></script>
 
-        // Add functionality to the skip button
-        skipBtn.addEventListener('click', () => {
-          // Clear the auto timer so it doesn't fire twice
-          clearTimeout(autoTimer);
-          hideLoader();
-        });
-      });
-    </script>
-  </body>
+<script>
+window.addEventListener('load', () => {
+  const loader = document.getElementById('app-loader');
+
+  const hideLoader = () => {
+    loader.classList.add('fade-out');
+  };
+
+  setTimeout(hideLoader, 500);
+});
+</script>
+
+</body>
 </html>

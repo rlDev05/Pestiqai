@@ -66,14 +66,8 @@ export function Footer() {
             </div>
 
             <p className="text-white/60 text-sm leading-relaxed max-w-xs">
-              Next-generation pest detection for premium properties. Powered by neural networks, secured by design.
+            Keep your space bug-free with the smartest pest monitor on the market. It uses advanced AI to spot pests before they become a problem, and it's built from the ground up to keep your data totally secure
             </p>
-            
-            {/* Location Tag */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#7ED957]/10 border border-[#7ED957]/20">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#7ED957] animate-pulse" />
-              <span className="text-xs font-medium text-[#7ED957] tracking-wide uppercase">NCR, Philippines Operational</span>
-            </div>
           </div>
 
           {/* Quick Links (Span 2 columns) */}
@@ -169,7 +163,6 @@ export function Footer() {
           {[
             { icon: Zap, label: "AI-Powered Analysis" },
             { icon: Lock, label: "Privacy-First Core" },
-            { icon: ShieldCheck, label: "Military-Grade Security" },
           ].map((badge, idx) => (
             <div key={idx} className="flex items-center gap-2 group cursor-default">
               <badge.icon className="w-4 h-4 text-[#7ED957] opacity-60 group-hover:opacity-100 group-hover:drop-shadow-[0_0_8px_rgba(126,217,87,0.6)] transition-all" />
@@ -182,9 +175,9 @@ export function Footer() {
 
         {/* Copyright & Links */}
         <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/5 gap-4">
-          <p className="text-xs text-white/30">
-            © 2026 PESTIQ AI. <span className="text-[#0F3D2E]">_</span> System Version 2.0
-          </p>
+        <p className="text-xs text-white/30">
+          © 2026 PESTIQ AI. All rights reserved. <span className="text-[#0F3D2E]"></span>
+        </p>
           <div className="flex gap-6">
              <a href="#" onClick={(e) => openModal(e, 'terms')} className="text-xs text-white/30 hover:text-[#7ED957] transition-colors">Terms of Service</a>
              <a href="#" onClick={(e) => openModal(e, 'privacy')} className="text-xs text-white/30 hover:text-[#7ED957] transition-colors">Privacy Policy</a>

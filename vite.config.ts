@@ -16,7 +16,22 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
+  
+  // ADDED: Build configuration to fix chunking issues
+  build: {
+    // Increases the warning threshold from 500kB to 1500kB (1.5MB)
+    chunkSizeWarningLimit: 1500, 
+    rollupOptions: {
+      output: {
+        // Splits third-party libraries into their own 'vendor' chunk
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        }
+      }
+    }
+  }
 })
